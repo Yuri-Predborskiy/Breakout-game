@@ -79,7 +79,7 @@
         for(col=0; col<brickColumnCount; col++) {
             bricks[col] = [];
             for(row=0; row<brickRowCount; row++) {
-                bricks[col][row] = { x: 0, y: 0 };
+                bricks[col][row] = { x: 0, y: 0, status: 1 };
             }
         }
         
@@ -141,15 +141,17 @@
         function drawBricks() {
             for(col=0; col<brickColumnCount; col++) {
                 for(row=0; row<brickRowCount; row++) {
-                    var brickX = (col*(brickWidth+brickPadding))+brickOffsetLeft;
-                    var brickY = (row*(brickHeight+brickPadding))+brickOffsetTop;
-                    bricks[col][row].x = brickX;
-                    bricks[col][row].y = brickY;
-                    ctx.beginPath();
-                    ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                    ctx.fillStyle = "#0095DD";
-                    ctx.fill();
-                    ctx.closePath();
+                    if(bricks[col][row].status == 1) {
+                        var brickX = (col*(brickWidth+brickPadding))+brickOffsetLeft;
+                        var brickY = (row*(brickHeight+brickPadding))+brickOffsetTop;
+                        bricks[col][row].x = brickX;
+                        bricks[col][row].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = "#0095DD";
+                        ctx.fill();
+                        ctx.closePath();
+                    }
                 }
             }
         }
@@ -189,25 +191,30 @@
             for(c=0; c<brickColumnCount; c++) {
                 for(r=0; r<brickRowCount; r++) {
                     var b = bricks[c][r];
-                    var circle = {
-                        x: x + dx,
-                        y: y + dy,
-                        r: ballRadius
-                    };
-                    var rect = {
-                        x: b.x,
-                        y: b.y,
-                        w: brickWidth,
-                        h: brickHeight
-                    };
-                    collision = RectCircleColliding(circle, rect);
-                    if(collision == "horizontal") {
-                        dy = -dy;
-                    } else if(collision == "vertical") {
-                        dx = -dx;
-                    } else if(collision == "edge") {
-                        dx = -dx;
-                        dy = -dy;
+                    if(b.status == 1) {
+                        var circle = {
+                            x: x + dx,
+                            y: y + dy,
+                            r: ballRadius
+                        };
+                        var rect = {
+                            x: b.x,
+                            y: b.y,
+                            w: brickWidth,
+                            h: brickHeight
+                        };
+                        collision = RectCircleColliding(circle, rect);
+                        if(collision == "horizontal") {
+                            dy = -dy;
+                            b.status = 0;
+                        } else if(collision == "vertical") {
+                            dx = -dx;
+                            b.status = 0;
+                        } else if(collision == "edge") {
+                            dx = -dx;
+                            dy = -dy;
+                            b.status = 0;
+                        }
                     }
                 }
             }
