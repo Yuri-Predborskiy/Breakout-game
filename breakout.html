@@ -73,7 +73,7 @@
         var brickWidth = 100;
         var brickHeight = 20;
         var brickPadding = 10;
-        var brickOffsetTop = 20;
+        var brickOffsetTop = 30;
         var brickOffsetLeft = 20;
         var bricks = [];
         for(col=0; col<brickColumnCount; col++) {
@@ -82,6 +82,7 @@
                 bricks[col][row] = { x: 0, y: 0, status: 1 };
             }
         }
+        var score = 0;
         
         function getRandomIntRange(min, max) {
             /* random number generator in int range (min, max) */
@@ -207,13 +208,28 @@
                         if(collision == "horizontal") {
                             dy = -dy;
                             b.status = 0;
+                            score++;
+                            if(score == brickRowCount*brickColumnCount) {
+                                alert("YOU WIN, CONGRATULATIONS!");
+                                document.location.reload();
+                            }
                         } else if(collision == "vertical") {
                             dx = -dx;
                             b.status = 0;
+                            score++;
+                            if(score == brickRowCount*brickColumnCount) {
+                                alert("YOU WIN, CONGRATULATIONS!");
+                                document.location.reload();
+                            }
                         } else if(collision == "edge") {
                             dx = -dx;
                             dy = -dy;
                             b.status = 0;
+                            score++;
+                            if(score == brickRowCount*brickColumnCount) {
+                                alert("YOU WIN, CONGRATULATIONS!");
+                                document.location.reload();
+                            }
                         }
                     }
                 }
@@ -241,8 +257,14 @@
             var deltaX = distX - rect.w / 2;
             var deltaY = distY - rect.h / 2;
             var result = (deltaX * deltaX + deltaY * deltaY <= (circle.r * circle.r));
-            if(result) return "edge"
-            return "none"
+            if(result) return "edge";
+            return "none";
+        }
+        
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Score: "+score, 8, 20);
         }
         
         function draw() {
@@ -261,6 +283,7 @@
             collisionDetection();
             y += dy;
             x += dx;
+            drawScore();
         }
         draw();
 
