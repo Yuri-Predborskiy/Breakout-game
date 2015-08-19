@@ -51,17 +51,19 @@
         var canvas = document.getElementById("myCanvas");
         var ctx = canvas.getContext("2d");
         var fps = 60;
-        // ball info
-        var x = canvas.width/2;
-        var y = canvas.height/2;
-        var dx = getRandomIntRange(2,10);
-        var dy = -getRandomIntRange(3,6);
-        var ballRadius = 12;
         // paddle variables
         var paddleHeight = 12;
         var paddleWidth = 120;
         var paddleXPosition = (canvas.width-paddleWidth)/2;
-        var paddleXVelocity = 10;
+        var paddleXVelocity = 8;
+        // ball info
+        var ballRadius = 12;
+        var x = canvas.width/2;
+        var y = canvas.height - paddleHeight - ballRadius;
+        var startSpeed = 10;
+        var startY = getRandomIntRange(30,70);
+        var dx = Math.round(startSpeed * (100 - startY) / 100);
+        var dy = Math.round(startSpeed * startY / 100);
         // keyboard controls
         var rightPressed = false;
         var leftPressed = false;
@@ -96,7 +98,7 @@
         
         function drawPaddle() {
             ctx.beginPath();
-            ctx.rect(paddleXPosition, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+            ctx.rect(paddleXPosition, canvas.height - paddleHeight, paddleWidth, paddleHeight);
             ctx.fillStyle = "#0095DD";
             ctx.fill();
             ctx.closePath();
@@ -110,7 +112,22 @@
             if(y + dy < ballRadius) {
                 dy = -dy;
             } else if(y + dy > canvas.height - ballRadius - paddleHeight) {
-                if(x > paddleXPosition && x < paddleXPosition + paddleWidth) {
+                var circle = {
+                    x: x + dx,
+                    y: y + dy,
+                    r: ballRadius
+                };
+                var rect = {
+                    x: paddleXPosition,
+                    y: canvas.height - paddleHeight,
+                    w: paddleWidth,
+                    h: paddleHeight
+                };
+                collision = RectCircleColliding(circle, rect);
+                if(collision == "horizontal") {
+                    dy = -dy;
+                } else if(collision == "vertical" || collision == "edge") {
+                    dx = -dx;
                     dy = -dy;
                 }
                 if(y + dy > canvas.height - ballRadius / 2) {
@@ -172,11 +189,53 @@
             for(c=0; c<brickColumnCount; c++) {
                 for(r=0; r<brickRowCount; r++) {
                     var b = bricks[c][r];
-                    if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                    var circle = {
+                        x: x + dx,
+                        y: y + dy,
+                        r: ballRadius
+                    };
+                    var rect = {
+                        x: b.x,
+                        y: b.y,
+                        w: brickWidth,
+                        h: brickHeight
+                    };
+                    collision = RectCircleColliding(circle, rect);
+                    if(collision == "horizontal") {
+                        dy = -dy;
+                    } else if(collision == "vertical") {
+                        dx = -dx;
+                    } else if(collision == "edge") {
+                        dx = -dx;
                         dy = -dy;
                     }
                 }
             }
+        }
+        
+        function RectCircleColliding(circle, rect) {
+            var distX = Math.abs(circle.x - rect.x - rect.w / 2);
+            var distY = Math.abs(circle.y - rect.y - rect.h / 2);
+
+            if (distX > (rect.w / 2 + circle.r)) {
+                return "none";
+            }
+            if (distY > (rect.h / 2 + circle.r)) {
+                return "none";
+            }
+
+            if (distX <= (rect.w / 2)) {
+                return "horizontal";
+            }
+            if (distY <= (rect.h / 2)) {
+                return "vertical";
+            }
+
+            var deltaX = distX - rect.w / 2;
+            var deltaY = distY - rect.h / 2;
+            var result = (deltaX * deltaX + deltaY * deltaY <= (circle.r * circle.r));
+            if(result) return "edge"
+            return "none"
         }
         
         function draw() {
