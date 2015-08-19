@@ -83,6 +83,7 @@
             }
         }
         var score = 0;
+        var lives = 3;
         
         function getRandomIntRange(min, max) {
             /* random number generator in int range (min, max) */
@@ -127,13 +128,43 @@
                 collision = RectCircleColliding(circle, rect);
                 if(collision == "horizontal") {
                     dy = -dy;
+                    // randomization of direction!
+                    var dxDirection = (dx > 0 ? 1 : -1);
+                    var dyDirection = (dy > 0 ? 1 : -1);
+                    var currSpeed = Math.abs(dx) + Math.abs(dy);
+                    var currDir = Math.abs(dx) / currSpeed * 100;
+                    var newDir = getRandomIntRange(Math.max(30, currDir - 15),Math.min(70, currDir + 15));
+                    // console.log("old dx = "+dx+" old dy = "+dy);
+                    dx = currSpeed * (100-newDir) / 100 * 1.03 * dxDirection;
+                    dy = currSpeed * newDir / 100 * 1.03 * dyDirection;
+                    //console.log("new dx = "+dx+" new dy = "+dy);
                 } else if(collision == "vertical" || collision == "edge") {
                     dx = -dx;
                     dy = -dy;
+                    // randomization of direction!
+                    var dxDirection = (dx > 0 ? 1 : -1);
+                    var dyDirection = (dy > 0 ? 1 : -1);
+                    var currSpeed = Math.abs(dx) + Math.abs(dy);
+                    var currDir = Math.abs(dx) / currSpeed * 100;
+                    var newDir = getRandomIntRange(Math.max(30, currDir - 15),Math.min(70, currDir + 15));
+                    // console.log("old dx = "+dx+" old dy = "+dy);
+                    dx = currSpeed * (100-newDir) / 100 * 1.03 * dxDirection;
+                    dy = currSpeed * newDir / 100 * 1.03 * dyDirection;
                 }
                 if(y + dy > canvas.height - ballRadius / 2) {
-                    alert("Game over!");
-                    document.location.reload();
+                    lives--;
+                    if(lives<=0) {
+                        alert("Game over!");
+                        document.location.reload();
+                    } else {
+                        x = canvas.width/2;
+                        y = canvas.height - paddleHeight - ballRadius;
+                        startSpeed = 10;
+                        startY = getRandomIntRange(30,70);
+                        dx = Math.round(startSpeed * (100 - startY) / 100);
+                        dy = Math.round(startSpeed * startY / 100);
+                        paddleXPosition = (canvas.width-paddleWidth)/2;
+                    }
                 }
             }
         }
@@ -267,6 +298,12 @@
             ctx.fillText("Score: "+score, 8, 20);
         }
         
+        function drawLives() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+        }
+        
         function draw() {
             document.addEventListener("keydown", keyDownHandler, false);
             document.addEventListener("keyup", keyUpHandler, false);
@@ -277,14 +314,16 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawBall();
             drawPaddle();
-            drawBricks();
             movePaddle();
             collisionDetectionWalls();
             collisionDetection();
+            drawBricks();
             y += dy;
             x += dx;
             drawScore();
+            drawLives();
         }
+        
         draw();
 
     </script>
