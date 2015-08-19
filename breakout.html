@@ -155,6 +155,7 @@
                     lives--;
                     if(lives<=0) {
                         alert("Game over!");
+                        newGame();
                         document.location.reload();
                     } else {
                         x = canvas.width/2;
@@ -239,31 +240,28 @@
                         if(collision == "horizontal") {
                             dy = -dy;
                             b.status = 0;
-                            score++;
-                            if(score == brickRowCount*brickColumnCount) {
-                                alert("YOU WIN, CONGRATULATIONS!");
-                                document.location.reload();
-                            }
+                            scorePoint();
                         } else if(collision == "vertical") {
                             dx = -dx;
                             b.status = 0;
-                            score++;
-                            if(score == brickRowCount*brickColumnCount) {
-                                alert("YOU WIN, CONGRATULATIONS!");
-                                document.location.reload();
-                            }
+                            scorePoint();
                         } else if(collision == "edge") {
                             dx = -dx;
                             dy = -dy;
                             b.status = 0;
-                            score++;
-                            if(score == brickRowCount*brickColumnCount) {
-                                alert("YOU WIN, CONGRATULATIONS!");
-                                document.location.reload();
-                            }
+                            scorePoint();
                         }
                     }
                 }
+            }
+        }
+        
+        function scorePoint() {
+            score++;
+            if(score == brickRowCount*brickColumnCount) {
+                alert("YOU WIN, CONGRATULATIONS!");
+                newGame(); // in case reload fails
+                document.location.reload();
             }
         }
         
@@ -322,6 +320,26 @@
             x += dx;
             drawScore();
             drawLives();
+        }
+        
+        // reset all variables
+        function newGame() {
+            paddleXPosition = (canvas.width-paddleWidth)/2;
+            x = canvas.width/2;
+            y = canvas.height - paddleHeight - ballRadius;
+            startSpeed = 10;
+            startY = getRandomIntRange(30,70);
+            dx = Math.round(startSpeed * (100 - startY) / 100);
+            dy = Math.round(startSpeed * startY / 100);
+            rightPressed = false;
+            leftPressed = false;
+            for(col=0; col<brickColumnCount; col++) {
+                for(row=0; row<brickRowCount; row++) {
+                    bricks[col][row] = { x: 0, y: 0, status: 1 };
+                }
+            }
+            score = 0;
+            lives = 3;
         }
         
         draw();
